@@ -79,7 +79,6 @@ router.get('/cookie',async function(req, res, next) {
 //查找当前登录用户
 router.get('/grxx',async function(req, res, next) {
     let login
-    console.log(req.query)
     login = await User.findOne({username: req.query.username})
 
     if(login){
@@ -127,4 +126,5 @@ router.post('/update', async function(req, res) {
         }
     }
 });
+
 module.exports = router;

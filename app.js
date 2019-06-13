@@ -5,16 +5,11 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const bodyparser = require('body-parser')
 
-
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-var gongyongRouter = require('./routes/gongyong');
-
 var cors = require('cors')
 var app = express()
 
 var corsOptions = {
-  origin: '*', //只有百度可以访问
+  origin: '*', //允许所有访问
   optionsSuccessStatus: 200 
 }
 app.use('*', cors(corsOptions), function (req, res, next) {
@@ -35,9 +30,20 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({ extended: false }));
 
+// 路由
+var indexRouter = require('./routes/index');
+var usersRouter = require('./routes/users');
+var gongyongRouter = require('./routes/gongyong');
+var powerRouter = require('./routes/power');
+var powerRelationRouter = require('./routes/powerRelation');
+
+
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/gongyong', gongyongRouter);
+app.use('/power', powerRouter);
+app.use('/powerRelation', powerRelationRouter);
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
