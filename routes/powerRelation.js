@@ -11,12 +11,10 @@ const User_p = require('../model/database/user_p');
 //新增权限
 router.post('/', async function(req, res) {
 
-    console.log(req.body)
-
     const powerRelation = new PowerRelation({
         powerRelationName: req.body.powerName,
         powerRelationId: req.body.powerRelationId,
-        P_number: req.body.PRSort
+        PR_Sort: req.body.PRSort
     });
 
     let yanzheng = await User.findOne({ username: req.body.uid })
@@ -62,6 +60,28 @@ router.get('/select', async function(req, res) {
         'message': '查询成功' ,
         'errData': items
     });
+});
+//修改权限
+router.post('/update', async function(req, res) {
+
+    const powerRelation = {
+        powerRelationName: req.body.powerName,
+        powerRelationId: req.body.powerRelationId,
+        PR_Sort: req.body.PRSort
+    };
+
+    let yanzheng = await User.findOne({ username: req.body.uid })
+
+    if(!yanzheng) {
+        res.send({'code': 1, 'errorMsg': '权限不够'})
+    } else {
+        let update = await  PowerRelation.updateOne({_id: objectId(req.body.pwId)},powerRelation).exec()
+        if (update) {
+            res.send({'code': 0, 'errorMsg': '修改成功'})
+        } else {
+            res.send({'code': 1, 'errorMsg': '修改失败'})
+        }
+    }
 });
 //用户绑定权限
 router.post('/bind', async function(req, res) {
@@ -138,9 +158,59 @@ router.get('/selectPowerRList', async function(req, res) {
             }
         }
         let item = {
+            id: powerRelation[i]._id,
             value: quanxian,
             name: powerRelation[i].powerRelationName,
             time: dayjs(powerRelation[i].PR_AddTime).format('YYYY-MM-DD HH-mm-ss')
+        }
+        items.push(item)
+    }
+    res.send({
+        'code': 0,
+        'message': '查询成功' ,
+        'errData': items
+    });
+});
+//查找修改的职位
+router.get('/selectPower', async function(req, res) {
+
+    let powerRelation = await PowerRelation.findOne({_id: objectId(req.query.id)})
+
+    let date = {
+        name: powerRelation.powerRelationName,
+        id: powerRelation._id,
+        sort: powerRelation.PR_Sort,
+        items: powerRelation.powerRelationId
+    }
+
+
+
+    res.send({
+        'code': 0,
+        'message': '查询成功' ,
+        'errData': date
+    });
+});
+//查找用户权限列表
+router.get('/selectUserPowerList', async function(req, res) {
+
+    let user_p = await User_p.find({})
+    let items = []
+
+    for (let i = 0; i < user_p.length; i++) {
+        let user = await User.findOne({_id: objectId(user_p[i].userId)})
+        let powerRelation = await PowerRelation.findOne({_id: objectId(user_p[i].powerId)})
+        let power = ''
+        if (powerRelation) {
+            power = powerRelation.powerRelationName
+        } else {
+            power = '该权限已删除'
+        }
+        let item = {
+            id: user_p[i]._id,
+            name: user.uname,
+            value: power,
+            time: dayjs(user_p[i].PU_AddTime).format('YYYY-MM-DD HH-mm-ss')
         }
         items.push(item)
     }
